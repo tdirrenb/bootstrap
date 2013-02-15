@@ -15,7 +15,7 @@ describe('tabs', function() {
           '<pane heading="First Tab">' +
             'first content is {{first}}' +
           '</pane>' +
-          '<pane heading="Second Tab">' +
+          '<pane heading="Second Tab" select="selectCb()">' +
             'second content is {{second}}' +
           '</pane>' +
         '</tabs>' +
@@ -85,6 +85,25 @@ describe('tabs', function() {
     expect(contents.eq(1)).toHaveClass('active');
     expect(contents.eq(1).css('display')).not.toBe('none');
   });
+
+
+    it('should trigger the select attribute if any', function() {
+
+      var titles = elm.find('ul.nav-tabs li');
+
+      // click the second tab
+      var called = false;
+      scope.selectCb = function(tab) {
+        called = true;
+      };
+      titles.eq(0).find('a').click();
+      expect(called).toBe(false);
+
+      titles.eq(1).find('a').click();
+      expect(called).toBe(true);
+
+    });
+
 });
 
 

@@ -41,7 +41,8 @@ angular.module('ui.bootstrap.tabs', [])
     restrict: 'EA',
     transclude: true,
     scope:{
-      heading:'@'
+      heading:'@',
+      select:'&'
     },
     link: function(scope, element, attrs, tabsCtrl) {
       var getSelected, setSelected;
@@ -57,6 +58,9 @@ angular.module('ui.bootstrap.tabs', [])
       }
       scope.$watch('selected', function(selected) {
         if(selected) {
+          if (scope.select) {
+            scope.select(this);
+          }
           tabsCtrl.select(scope);
         }
         if(setSelected) {
