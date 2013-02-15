@@ -91,7 +91,6 @@ describe('tabs', function() {
 
       var titles = elm.find('ul.nav-tabs li');
 
-      // click the second tab
       var called = false;
       scope.selectCb = function(tab) {
         called = true;
