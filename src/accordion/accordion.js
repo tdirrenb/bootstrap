@@ -130,7 +130,6 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
     require: '^accordionGroup',
     link: function(scope, element, attr, controller) {
       scope.$watch(function() { return controller[attr.accordionTransclude]; }, function(heading) {
-        console.log(heading);
         if ( heading ) {
           element.html('');
           element.append(heading);
