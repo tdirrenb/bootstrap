@@ -1,0 +1,7 @@
+<div class="dropdown clearfix" ng-class="{open: isOpen()}">
+    <ul class="typeahead dropdown-menu">
+        <li ng-repeat="value in matches" ng-class="{active: isActive($index) }" ng-mouseenter="selectActive($index)">
+            <a tabindex="-1" ng-click="selectMatch($index)" ng-bind-html-unsafe="value | typeaheadHighlight:query"></a>
+        </li>
+    </ul>
+</div>
