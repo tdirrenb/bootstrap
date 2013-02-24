@@ -38,6 +38,8 @@ angular.module('ui.bootstrap.typeahead', [])
     require:'ngModel',
     link:function (originalScope, element, attrs, modelCtrl) {
 
+      var selected = modelCtrl.$modelValue;
+
       //minimal no of characters that needs to be entered before typeahead kicks-in
       var minSearch = originalScope.$eval(attrs.typeaheadMinLength) || 1;
 
@@ -56,9 +58,6 @@ angular.module('ui.bootstrap.typeahead', [])
         scope.activeIdx = -1;
       };
 
-      // was an item selected by a user?
-      var selected = false;
-
       var getMatchesAsync = function(inputValue) {
 
         var locals = {$viewValue: inputValue};
@@ -66,7 +65,7 @@ angular.module('ui.bootstrap.typeahead', [])
 
           //it might happen that several async queries were in progress if a user were typing fast
           //but we are interested only in responses that correspond to the current view value
-          if (inputValue === modelCtrl.$viewValue){
+          if (inputValue === modelCtrl.$viewValue) {
             if (matches.length > 0) {
 
               scope.activeIdx = 0;
@@ -75,8 +74,13 @@ angular.module('ui.bootstrap.typeahead', [])
               //transform labels
               for(var i=0; i<matches.length; i++) {
                 locals[parserResult.itemName] = matches[i];
-                scope.matches.push(parserResult.viewMapper(scope, locals));
+                scope.matches.push({
+                  label: parserResult.viewMapper(scope, locals),
+                  model: matches[i]
+                });
               }
+
+              scope.query = inputValue;
 
             } else {
               resetMatches();
@@ -91,34 +95,37 @@ angular.module('ui.bootstrap.typeahead', [])
       scope.query = undefined;
 
       //plug into $parsers pipeline to open a typeahead on view changes initiated from DOM
+      //$parsers kick-in on all the changes coming from the vview as well as manually triggered by $setViewValue
       modelCtrl.$parsers.push(function (inputValue) {
 
-        scope.activeIdx = -1;
-        if (inputValue && inputValue.length >= minSearch) {
-
-          if (!selected) {
-            scope.query = inputValue;
-            getMatchesAsync(inputValue);
-          } else {
-            scope.matches = [];
-            selected = false;
-          }
-
+        resetMatches();
+        if (selected) {
+          selected = undefined;
+          return inputValue;
         } else {
-          scope.matches = [];
+          if (inputValue && inputValue.length >= minSearch) {
+            getMatchesAsync(inputValue);
+          }
         }
 
-        return inputValue;
+        return undefined;
       });
+
+      modelCtrl.$render = function() {
+        var locals = {};
+        if (modelCtrl.$viewValue) {
+          locals[parserResult.itemName] = modelCtrl.$viewValue;
+          element.val(parserResult.viewMapper(scope, locals));
+        }
+      };
 
       scope.select = function (activeIdx) {
         //called from within the $digest() cycle
-        selected = true;
-
         var locals = {};
-        locals[parserResult.itemName] = scope.matches[activeIdx];
+        locals[parserResult.itemName] = scope.matches[activeIdx].model;
 
-        modelCtrl.$setViewValue(parserResult.modelMapper(scope, locals));
+        selected = parserResult.modelMapper(scope, locals);
+        modelCtrl.$setViewValue(selected);
         modelCtrl.$render();
       };
 
@@ -191,7 +198,7 @@ angular.module('ui.bootstrap.typeahead', [])
     };
   })
 
-.filter('typeaheadHighlight', function() {
+  .filter('typeaheadHighlight', function() {
     return function(matchItem, query) {
       return (query) ? matchItem.replace(new RegExp(query, 'gi'), '<strong>$&</strong>') : query;
     };
