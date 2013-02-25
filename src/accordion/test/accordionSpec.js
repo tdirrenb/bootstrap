@@ -281,6 +281,19 @@ describe('accordion', function () {
       it('attaches the same scope to the transcluded heading and body', function() {
         expect(findGroupLink(0).find('span').scope().$id).toBe(findGroupBody(0).find('span').scope().$id);
       });
+
+    });
+
+    describe('accordion-heading, with repeating accordion-groups', function() {
+      it('should clone the accordion-heading for each group', function() {
+        element = $compile('<accordion><accordion-group ng-repeat="x in [1,2,3]"><accordion-heading>{{x}}</accordion-heading></accordion-group></accordion>')(scope);
+        scope.$digest();
+        groups = element.find('.accordion-group');
+        expect(groups.length).toBe(3);
+        expect(findGroupLink(0).text()).toBe('1');
+        expect(findGroupLink(1).text()).toBe('2');
+        expect(findGroupLink(2).text()).toBe('3');
+      });
     });
   });
 });

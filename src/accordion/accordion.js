@@ -113,7 +113,8 @@ angular.module('ui.bootstrap.accordion', ['ui.bootstrap.collapse'])
       return function link(scope, element, attr, accordionGroupCtrl) {
         // Pass the heading to the accordion-group controller
         // so that it can be transcluded into the right place in the template
-        accordionGroupCtrl.setHeading(transclude(scope));
+        // [The second parameter to transclude causes the elements to be cloned so that they work in ng-repeat]
+        accordionGroupCtrl.setHeading(transclude(scope, function() {}));
       };
     }
   };
